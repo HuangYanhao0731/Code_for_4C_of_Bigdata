@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>请先进行商品检测</h1>
+    <p>在查看可视化之前，请先进行商品检测。</p>
+    <a href="{{ url_for('upload') }}" class="btn btn-primary">上传文件</a>
+</div>
+{% endblock %}

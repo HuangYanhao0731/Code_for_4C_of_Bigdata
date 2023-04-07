@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}后台管理{% endblock %}
+{% block content %}
+ <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      margin-top: 50px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    button {
+      padding: 5px 10px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+  </style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <h1>后台管理</h1>
+  <h2>用户管理</h2>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>用户名</th>
+      <th>电子邮箱</th>
+      <th>身份</th>
+      <th>操作</th>
+    </tr>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>
+<form action="{{ url_for('edit_user', user_id=user.id) }}" method="get" style="display:inline;">
+    <button type="submit">修改</button>
+</form>
+<form action="{{ url_for('delete_user', user_id=user.id) }}" method="post" style="display:inline;">
+    <button type="submit" onclick="return confirm('确定要删除此用户吗？');">删除</button>
+</form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h2>异常商品查询</h2>
+<!-- Add search form here -->
+<form action="{{ url_for('admin') }}" method="GET">
+  <input type="text" name="item_id" placeholder="输入商品ID..." required>
+  <button type="submit">搜索</button>
+</form>
+  {% if anomaly_records %}
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>异常商品ID</th>
+      <th>年份</th>
+      <th>月份</th>
+      <th>异常类型</th>
+    </tr>
+    {% for record in anomaly_records %}
+      <tr>
+        <td>{{ record.id }}</td>
+        <td>{{ record.item_id }}</td>
+        <td>{{ record.year }}</td>
+        <td>{{ record.month }}</td>
+        <td>{{ record.type }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  {% elif message %}
+  <p>{{ message }}</p>
+  {% endif %}
+
+<h2>删除历史数据</h2>
+<form action="{{ url_for('delete_history') }}" method="POST" id="delete-history-form">
+  <div id="alert-container"></div>
+    <label for="year">年份：</label>
+    <input type="number" name="year" id="year" min="1900" max="2099" step="1" value="2022" required>
+    <label for="month">月份：</label>
+    <input type="number" name="month" id="month" min="1" max="12" step="1" value="1" required>
+    <button type="submit">删除数据</button>
+  {% if message2 %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ message2 }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{% endif %}
+</form>
+
+  <h2>用户的反馈</h2>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>用户ID</th>
+      <th>反馈内容</th>
+      <th>反馈日期</th>
+      <th>操作</th>
+    </tr>
+    {% for feedback in feedbacks %}
+      <tr>
+        <td>{{ feedback.id }}</td>
+        <td>{{ feedback.user_id }}</td>
+        <td>{{ feedback.content }}</td>
+        <td>{{ feedback.submit_date }}</td>
+        <td>
+          <form action="{{ url_for('mark_feedback_as_read', feedback_id=feedback.id) }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-success">已读</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+<script>
+  $(document).ready(function () {
+    $("#delete-history-form").on("submit", function (event) {
+      event.preventDefault();
+      var formData = $(this).serialize();
+      var formUrl = $(this).attr("action");
+
+      $.ajax({
+        type: "POST",
+        url: formUrl,
+        data: formData,
+        dataType: 'json',
+        success: function (response) {
+          if (response.status === 'success') {
+            showAlert(response.message2, "success");
+          } else {
+            showAlert("发生错误，请稍后再试。", "error");
+          }
+        },
+        error: function () {
+          showAlert("发生错误，请稍后再试。", "error");
+        },
+      });
+    });
+
+    function showAlert(message, status) {
+      var alertClass = status === "success" ? "alert-success" : "alert-danger";
+      var alertHtml = `<div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                          ${message}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                       </div>`;
+      $("#alert-container").html(alertHtml);
+    }
+  });
+</script>
+
+{% endblock %}

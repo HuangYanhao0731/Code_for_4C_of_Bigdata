@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}异常商品检测{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="my-4">选择文件</h2>
+    <form id="file-form" method="post" enctype="multipart/form-data">
+        <div class="custom-file mb-3">
+            <input type="file" class="custom-file-input" id="file-selector" name="file" accept=".tsv,.xlsx,.csv">
+            <label class="custom-file-label" for="file-selector">选择文件</label>
+        </div>
+        <button id="start-analysis" class="btn btn-primary" disabled>开始检测</button>
+    </form>
+    <div id="progress-container" class="progress mt-3" style="display: none;">
+        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+             role="progressbar" style="width: 0%" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p id="status-message" class="mt-3"></p>
+  <div id="upload-to-db-container" style="display: none;">
+    <form id="upload-to-db-form">
+        <h4>上传异常商品至数据库</h4>
+        <div class="form-group">
+            <label for="year">年份</label>
+            <input type="number" class="form-control" id="year" placeholder="请输入年份">
+        </div>
+        <div class="form-group">
+            <label for="month">月份</label>
+            <input type="number" class="form-control" id="month" placeholder="请输入月份">
+        </div>
+        <button type="submit" class="btn btn-primary">上传至数据库</button>
+
+    </form>
+      <div>
+            <button id="generate-visualization" class="btn btn-primary mt-3" disabled>生成可视化图表</button>
+      </div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$('#generate-visualization').click(function() {
+    // 跳转到可视化图表页面
+    window.location.href = '/visualization';
+});
+
+    // 当检测完成后，显示上传至数据库的表单
+ function showUploadToDbForm() {
+    $('#upload-to-db-container').show();
+    $('#upload-to-db-form').show();
+}
+    $('#upload-to-db-form').submit(function(event) {
+        event.preventDefault();
+        var year = $('#year').val();
+        var month = $('#month').val();
+
+        if (!year || !month) {
+            alert('请提供年份和月份');
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '/upload_to_db',
+            data: { year: year, month: month },
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert('上传成功！\n年份: ' + year + '\n月份: ' + month);
+                } else {
+                    alert('上传异常商品至数据库时出错，请重试');
+                }
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        $('#file-selector').change(function(event) {
+            var file = $('#file-selector')[0].files[0];
+            var form_data = new FormData();
+            form_data.append('file', file);
+            $('#start-analysis').prop('disabled', !file);
+            $('#status-message').text(file ? '文件已选择，准备开始检测...' : '请选择文件');
+            $('#upload-to-db-container').hide(); // 隐藏上传至数据库的表单
+        });
+
+        $('#file-form').submit(function(event) {
+            event.preventDefault();
+            var file = $('#file-selector')[0].files[0];
+            if (!file) {
+                $('#status-message').text('请选择文件');
+                return;
+            }
+            var form_data = new FormData();
+            form_data.append('file', file);
+            $.ajax({
+                type: 'POST',
+                url: '/upload',
+                data: form_data,
+                contentType: false,
+                processData: false,
+                beforeSend: function() {
+                    $('#start-analysis').prop('disabled', true);
+                    $('#status-message').text('正在上传文件，请稍等...');
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#status-message').text('上传文件成功，正在检测异常商品，请稍等...');
+                        $('#progress-container').show(); // 显示进度条
+
+                        // 调用 start_analysis 路由
+                        $.ajax({
+                            type: 'POST',
+                            url: '/start_analysis',
+                            data: JSON.stringify({ input_file_path: response.input_file_path }),
+                            contentType: 'application/json',
+                            success: function(response) {
+                                if (response.status === 'success') {
+                                    $('#start-analysis').prop('disabled', false);
+                                } else {
+                                    $('#status-message').text('开始检测异常商品时出错，请重试。');
+                                    $('#start-analysis').prop('disabled', false);
+                                }
+                            }
+                        });
+
+                        // 同时查询进度
+                        var interval = setInterval(function() {
+                            $.ajax({
+                                type: 'GET',
+                                url: '/progress',
+                                success: function(response) {
+                                    var progress = parseInt(response.progress);
+                                    $('#progress-bar').attr('style', 'width:' + progress + '%');
+                                    $('#progress-bar').text(progress + '%');
+                                    $('#status-message').text('正在检测异常商品，请稍等... (' + progress + '%)');
+                                    if (progress === 100) {
+                                        clearInterval(interval);
+                                        $('#status-message').text('检测完毕，共检测到 ' + response.anomaly_count + ' 个异常商品。');
+                                        $('#progress-container').hide();
+                                        $('<a href="' + response.result_url + '" class="btn btn-primary mt-3">下载检测结果</a>').appendTo($('#status-message'));
+                                        $('<a href="/result_html" class="btn btn-primary mt-3" target="_blank">在线浏览检测结果</a>').appendTo($('#status-message'));
+                                        showUploadToDbForm(); // 在此处添加这行代码
+                                         $('#generate-visualization').prop('disabled', false); // 启用生成可视化图表按钮
+                                    }
+                                },
+                                error: function() {
+                                clearInterval(interval);
+                                $('#status-message').text('检测异常商品过程中发生错误，请重试。');
+                                $('#progress-container').hide();
+                                $('#start-analysis').prop('disabled', false);
+                                }
+                                });
+                                }, 500);
+                                  } else {
+                    $('#status-message').text('上传文件失败，请检查文件格式。');
+                    $('#start-analysis').prop('disabled', false);
+                }
+            }
+        });
+    });
+});
+</script>
+
+
+{% endblock %}

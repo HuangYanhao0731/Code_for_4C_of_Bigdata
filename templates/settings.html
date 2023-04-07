@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}个人信息{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h1 class="my-4"></h1>
+        <form method="POST" action="{{ url_for('settings') }}">
+
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="请输入新用户名" value="{{ current_username }}">
+            </div>
+            <div class="form-group">
+                <label for="email">电子邮箱</label>
+                <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="请输入新邮箱" value="{{ current_email }}">
+            </div>
+            <div class="form-group">
+                <label for="password">新密码</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="请输入新密码">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">确认密码</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="请再次输入密码">
+            </div>
+            <button type="submit" class="btn btn-primary">保存</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

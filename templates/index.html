@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品异常数据分析平台</title>
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+</head>
+<body>
+{% extends 'base.html' %}
+
+{% block title %}网络零售平台异常商品检测系统{% endblock %}
+
+{% block content %}
+
+  <div class="container mt-4">
+    <h2 class="text-center mb-4">商品异常数据分析平台</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            月度异常商品分布
+          </div>
+          <div class="card-body">
+            <canvas id="monthlyAnomaliesChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            异常商品类别分布
+          </div>
+          <div class="card-body">
+            <canvas id="categoryAnomaliesChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            最近的异常商品列表
+          </div>
+          <div class="card-body">
+            <table class="table table-striped" >
+              <thead>
+                <tr>
+                  <th>商品ID</th>
+                  <th>异常类型</th>
+                  <th>年月份</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>654435171720</td>
+                  <td>价格异常</td>
+                  <td>2023/3</td>
+                </tr>
+                <tr>
+                  <td>654435655064</td>
+                  <td>价格异常+销量异常</td>
+                  <td>2023/3</td>
+                </tr>
+            <tr>
+              <td>654436715661</td>
+<td>价格异常</td>
+<td>2023/3</td>
+</tr>
+<tr>
+<td>654433735196</td>
+<td>价格异常</td>
+<td>2023/3</td>
+</tr>
+<!-- Add more recent anomalies data here -->
+</tbody>
+</table>
+</div>
+</div>
+
+  </div>
+</div>
+        </div>
+  <script>
+    // Monthly anomalies chart
+    var ctx1 = document.getElementById('monthlyAnomaliesChart').getContext('2d');
+    var monthlyAnomaliesChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: '异常商品数',
+                data: [281784, 278374, 289642, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    // Category anomalies chart
+var ctx2 = document.getElementById('categoryAnomaliesChart').getContext('2d');
+var categoryAnomaliesChart = new Chart(ctx2, {
+    type: 'pie',
+    data: {
+        labels: ['男装', '食品酒饮', '个护清洁', '运动户外', '内衣配饰', '母婴童装', '家具家装', '鞋靴', '女装', '其他'],
+        datasets: [{
+            data: [125672, 100623, 50923, 90223, 90923, 65231, 60231, 70923, 135343, 239499],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(255, 99, 71, 0.2)',
+                'rgba(0, 206, 209, 0.2)',
+                'rgba(138, 43, 226, 0.2)',
+                'rgba(30, 144, 255, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+               'rgba(153, 102, 255, 1)',
+'rgba(255, 159, 64, 1)',
+'rgba(255, 99, 71, 1)',
+'rgba(0, 206, 209, 1)',
+'rgba(138, 43, 226, 1)',
+'rgba(30, 144, 255, 1)'
+],
+borderWidth: 1
+}]
+},
+});
+</script>
+{% endblock %}
+
+</body>
+</html>

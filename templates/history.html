@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}History{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h1 class="my-4">历史查询</h1>
+        <form method="GET" action="{{ url_for('history') }}">
+            <div class="form-group">
+                <label for="year">选择年份</label>
+                <input type="number" class="form-control" id="year" name="year" min="2000" max="2099" value="{{ year }}">
+            </div>
+            <div class="form-group">
+                <label for="month">选择月份</label>
+                <input type="number" class="form-control" id="month" name="month" min="1" max="12" value="{{ month }}">
+            </div>
+            <button type="submit" class="btn btn-primary">查询</button>
+        </form>
+        {% if items is not none %}
+            {% if items|length > 0 %}
+                <h2 class="mt-4">{{ year }}/{{ month }}的异常商品数据</h2>
+                <table class="table table-striped">
+                </table>
+                    <a href="{{ url_for('download_history', year=year, month=month) }}" class="btn btn-primary">下载异常商品数据</a>
+            {% else %}
+                <p class="mt-4">没有找到{{ year }}/{{ month }}的异常商品数据。</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

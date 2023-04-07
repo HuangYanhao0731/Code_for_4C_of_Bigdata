@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}反馈{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="my-4">反馈</h1>
+        <form method="POST" action="{{ url_for('feedback') }}">
+            <div class="form-group">
+                <label for="feedback">你的反馈</label>
+                <textarea class="form-control" id="feedback" name="feedback" rows="5" placeholder="请在这儿写下你宝贵的建议吧！"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">提交</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{% if thanks %}
+    <script>
+        alert("感谢你的反馈！");
+    </script>
+{% endif %}
+{% endblock %}

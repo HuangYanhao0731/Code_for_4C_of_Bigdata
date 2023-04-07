@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}管理用户{% endblock %}
+{% block content %}
+  <h1>管理用户</h1>
+  <form action="{{ url_for('edit_user', user_id=user[0]) }}" method="POST">
+    <div class="form-group">
+      <label for="username">用户名:</label>
+      <input type="text" class="form-control" id="username" name="username" value="{{ user[1] }}" required>
+    </div>
+    <div class="form-group">
+      <label for="email">电子邮箱:</label>
+      <input type="email" class="form-control" id="email" name="email" value="{{ user[3] }}" required>
+    </div>
+       <div class="form-group">
+      <label for="password">新密码（请不要和旧密码重复）:</label>
+      <input type="password" class="form-control" id="password" name="password">
+    </div>
+    <div class="form-group">
+      <label for="role">身份:</label>
+      <select class="form-control" id="role" name="role">
+        <option value="user" {% if user[4] == 'user' %}selected{% endif %}>User</option>
+        <option value="admin" {% if user[4] == 'admin' %}selected{% endif %}>Admin</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">提交</button>
+    <a href="{{ url_for('admin') }}" class="btn btn-secondary">取消</a>
+  </form>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>下载结果</h2>
+    <a id="download-link" href="{{ output_file }}" download="results.xlsx" class="btn btn-primary">下载结果</a>
+    <br>
+    <br>
+    <a href="{{ url_for('view_results') }}" class="btn btn-secondary">在线浏览</a>
+    <br>
+    <br>
+    <button id="save-db" class="btn btn-success">保存到数据库</button>
+    <div id="year-month-selector" style="display: none;">
+        <label for="year">年份：</label>
+        <input type="number" id="year" min="1900" max="2099" step="1" value="{{ current_year }}" />
+        <label for="month">月份：</label>
+        <input type="number" id="month" min="1" max="12" step="1" value="{{ current_month }}" />
+        <button id="save-db-confirm" class="btn btn-success ml-2">确认保存</button>
+    </div>
+</div>
+{% endblock %}
